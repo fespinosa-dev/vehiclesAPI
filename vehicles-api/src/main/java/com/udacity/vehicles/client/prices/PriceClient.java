@@ -13,10 +13,10 @@ public class PriceClient {
 
     private static final Logger log = LoggerFactory.getLogger(PriceClient.class);
 
-    private final WebClient client;
+    private final WebClient.Builder clientBuilder;
 
-    public PriceClient(WebClient pricing) {
-        this.client = pricing;
+    public PriceClient(WebClient.Builder pricing) {
+        this.clientBuilder = pricing;
     }
 
     // In a real-world application we'll want to add some resilience
@@ -32,13 +32,9 @@ public class PriceClient {
      */
     public String getPrice(Long vehicleId) {
         try {
-            Price price = client
+            Price price = clientBuilder.build()
                     .get()
-                    .uri(uriBuilder -> uriBuilder
-                            .path("services/price/")
-                            .queryParam("vehicleId", vehicleId)
-                            .build()
-                    )
+                    .uri("lb://pricing-service/services/price?vehicleId={vehicleId}", vehicleId)
                     .retrieve().bodyToMono(Price.class).block();
 
             return String.format("%s %s", price.getCurrency(), price.getPrice());

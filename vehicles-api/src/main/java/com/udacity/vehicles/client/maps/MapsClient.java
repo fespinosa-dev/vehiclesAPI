@@ -16,12 +16,12 @@ public class MapsClient {
 
     private static final Logger log = LoggerFactory.getLogger(MapsClient.class);
 
-    private final WebClient client;
+    private final WebClient.Builder clientBuilder;
     private final ModelMapper mapper;
 
-    public MapsClient(WebClient maps,
+    public MapsClient(WebClient.Builder maps,
             ModelMapper mapper) {
-        this.client = maps;
+        this.clientBuilder = maps;
         this.mapper = mapper;
     }
 
@@ -33,15 +33,11 @@ public class MapsClient {
      */
     public Location getAddress(Location location) {
         try {
-            Address address = client
-                    .get()
-                    .uri(uriBuilder -> uriBuilder
-                            .path("/maps/")
-                            .queryParam("lat", location.getLat())
-                            .queryParam("lon", location.getLon())
-                            .build()
-                    )
-                    .retrieve().bodyToMono(Address.class).block();
+            Address address = clientBuilder.build()
+                .get()
+                .uri("lb://boogle-maps/maps?lat={lat}&lon={lon}",
+                        location.getLat(), location.getLon())
+                .retrieve().bodyToMono(Address.class).block();
 
             mapper.map(Objects.requireNonNull(address), location);
 

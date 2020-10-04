@@ -7,6 +7,9 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.cloud.client.discovery.EnableDiscoveryClient;
+import org.springframework.cloud.client.loadbalancer.LoadBalanced;
+import org.springframework.cloud.netflix.eureka.EnableEurekaClient;
 import org.springframework.context.annotation.Bean;
 import org.springframework.data.jpa.repository.config.EnableJpaAuditing;
 import org.springframework.web.reactive.function.client.WebClient;
@@ -18,6 +21,7 @@ import org.springframework.web.reactive.function.client.WebClient;
  */
 @SpringBootApplication
 @EnableJpaAuditing
+@EnableDiscoveryClient
 public class VehiclesApiApplication {
 
     public static void main(String[] args) {
@@ -46,23 +50,22 @@ public class VehiclesApiApplication {
     }
 
     /**
-     * Web Client for the maps (location) API
-     * @param endpoint where to communicate for the maps API
+     * Web Client builder for the maps (location) API
      * @return created maps endpoint
      */
     @Bean(name="maps")
-    public WebClient webClientMaps(@Value("${maps.endpoint}") String endpoint) {
-        return WebClient.create(endpoint);
+    @LoadBalanced
+    public WebClient.Builder webClientMapsBuilder() {
+        return WebClient.builder();
     }
-
     /**
-     * Web Client for the pricing API
-     * @param endpoint where to communicate for the pricing API
+     * Web Client builder for the pricing API
      * @return created pricing endpoint
      */
     @Bean(name="pricing")
-    public WebClient webClientPricing(@Value("${pricing.endpoint}") String endpoint) {
-        return WebClient.create(endpoint);
+    @LoadBalanced
+    public WebClient.Builder webClientPriceBuilder() {
+        return WebClient.builder();
     }
 
 }
